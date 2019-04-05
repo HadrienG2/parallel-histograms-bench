@@ -147,8 +147,8 @@ compare-and-swap based emulation. The performance of this solution should be
 studied.
 
 To summarize, atomics beat mutexes in simple cases, but their less predictable
-performance and lack of optimization headroom makes them hard to recommend in
-more complex cases.
+performance, inflexibility and lack of optimization headroom makes them hard to
+recommend in more complex cases.
 
 ### Thread-local copies
 
