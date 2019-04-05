@@ -1,4 +1,4 @@
-# Microbenchmark for several parallel histogramming strategies
+# Microbenchmarking parallel histogramming strategies
 
 ## Introduction
 
