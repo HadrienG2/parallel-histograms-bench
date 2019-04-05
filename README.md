@@ -154,7 +154,7 @@ more complex cases.
 
 This is the most scalable solution by a large margin, but it is obviously also
 the most costly one in terms of memory usage. This can make it inappropriate for
-scenarios with a huge number of histograms are in use, such as data quality
+scenarios where a huge number of histograms are in use, such as data quality
 monitoring.
 
 The performance difference between this thread-local implementation and
