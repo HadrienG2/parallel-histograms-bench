@@ -184,6 +184,9 @@ ping-pong effects entirely.
 
 ## Running the benchmarks yourself
 
+This was developed using Rust 1.33. Compatibility with older Rust versions was
+not checked and is likely not to reach very far in the past.
+
 Tune the parameters in src/lib.rs as you like, then do...
 
     $ cargo test --release -- --nocapture --test-threads=1
