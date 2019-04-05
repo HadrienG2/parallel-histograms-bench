@@ -33,7 +33,7 @@ impl ToyHistogram {
 impl Histogram for ToyHistogram {
     fn fill_mut(&mut self, values: &[f32]) {
         for value in values {
-            let bin = f32::floor(value * (self.bins.len() as f32)) as usize;
+            let bin = (value * (self.bins.len() as f32)) as usize;
             self.bins[bin] += 1;
         }
     }

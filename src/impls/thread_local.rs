@@ -10,10 +10,11 @@ use {
 // Thread-safe histogram implementation which works by maintaining one histogram
 // per thread. Maximally scalable to many threads, but least memory efficient.
 //
-// Note that although an AtomicHistogram is used in order to avoid undefined
-// behaviour, this implementation only uses atomic loads and stores, which are
-// free on current hardware. So barring compiler mis-optimization, filling this
-// histogram should be as fast as filling a ToyHistogram.
+// Note that although an AtomicHistogram is needed in order to avoid undefined
+// behaviour on concurrent fill() and num_hits() calls, this implementation only
+// uses atomic loads and stores, which are free on current hardware. So barring
+// compiler mis-optimization, filling this histogram should be as fast as
+// filling a ToyHistogram sequentially.
 //
 pub struct ThreadLocalHistogram {
     buckets: Vec<UnsafeCell<AtomicHistogram>>,

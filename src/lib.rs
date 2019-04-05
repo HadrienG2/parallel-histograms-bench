@@ -23,6 +23,7 @@ mod tests {
     const NUM_BUCKETS: usize = 2;
 
     // Generate a bunch of random numbers
+    #[inline(never)]
     fn gen_input<'a>(rng: &mut impl rand::Rng, buf: &'a mut Vec<f32>) -> &'a [f32] {
         buf.clear();
         for _ in 0..BATCH_SIZE {
