@@ -1,32 +1,20 @@
-use std::{
-    cell::UnsafeCell,
-    ops::DerefMut,
-    sync::{
-        atomic::{AtomicUsize, Ordering},
-        Mutex,
+pub(crate) mod thread_id;
+pub(crate) mod traits;
+
+use {
+    crate::{
+        thread_id::ThreadID,
+        traits::{Histogram, SyncHistogram},
+    },
+    std::{
+        cell::UnsafeCell,
+        ops::DerefMut,
+        sync::{
+            atomic::{AtomicUsize, Ordering},
+            Mutex,
+        },
     },
 };
-
-// Trait that any histogram must implement
-// For simplicity, we restrict ourselves to 1D histograms
-trait Histogram {
-    fn fill_all_mut(&mut self, values: &[f32]);
-    fn fill_mut(&mut self, value: f32) { self.fill_all_mut(&[value]) }
-    fn num_hits(&self) -> usize;
-}
-
-// Thread-safe version that can be filled in parallel
-trait SyncHistogram: Sync {
-    fn fill_all(&self, values: &[f32]);
-    fn fill(&self, value: f32) { self.fill_all(&[value]) }
-    fn num_hits(&self) -> usize;
-}
-
-// Any thread-safe histogram can be used sequentially
-impl<T: SyncHistogram> Histogram for T {
-    fn fill_all_mut(&mut self, values: &[f32]) { self.fill_all(values) }
-    fn num_hits(&self) -> usize { self.num_hits() }
-}
 
 // Simplest histogram that we can do performance tests with
 // One dimensional, everything has same weight, bin absciss in [0, 1[ range
@@ -43,7 +31,7 @@ impl ToyHistogram {
 }
 
 impl Histogram for ToyHistogram {
-    fn fill_all_mut(&mut self, values: &[f32]) {
+    fn fill_mut(&mut self, values: &[f32]) {
         for value in values {
             let bin = f32::floor(value * (self.bins.len() as f32)) as usize;
             self.bins[bin] += 1;
@@ -57,8 +45,8 @@ impl Histogram for ToyHistogram {
 
 // Basic thread-safe implementation that simply serializes using a lock
 impl SyncHistogram for Mutex<ToyHistogram> {
-    fn fill_all(&self, values: &[f32]) {
-        self.lock().unwrap().fill_all_mut(values)
+    fn fill(&self, values: &[f32]) {
+        self.lock().unwrap().fill_mut(values)
     }
 
     fn num_hits(&self) -> usize {
@@ -79,20 +67,18 @@ impl ThreadBucketizedHistogram {
         }
     }
 
-    fn lock_bucket(&self) -> impl DerefMut<Target=ToyHistogram> + '_ {
-        THREAD_ID.with(|id| self.buckets[id % self.buckets.len()].lock().unwrap())
+    fn lock_bucket(&self, id: ThreadID) -> impl DerefMut<Target=ToyHistogram> + '_ {
+        self.buckets[usize::from(id) % self.buckets.len()].lock().unwrap()
     }
 }
 
-static THREAD_ID_CTR: AtomicUsize = AtomicUsize::new(0);
-
-thread_local! {
-    pub static THREAD_ID: usize = THREAD_ID_CTR.fetch_add(1, Ordering::Relaxed);
-}
-
 impl SyncHistogram for ThreadBucketizedHistogram {
-    fn fill_all(&self, values: &[f32]) {
-        self.lock_bucket().fill_all_mut(values)
+    fn fill(&self, values: &[f32]) {
+        self.fill_with_id(values, ThreadID::load())
+    }
+
+    fn fill_with_id(&self, values: &[f32], id: ThreadID) {
+        self.lock_bucket(id).fill_mut(values)
     }
 
     fn num_hits(&self) -> usize {
@@ -115,20 +101,22 @@ impl ThreadLocalHistogram {
         }
     }
 
-    fn get_bucket(&self) -> impl DerefMut<Target=ToyHistogram> + '_ {
-        THREAD_ID.with(|id| {
-            let bucket_ptr = self.buckets[id % self.buckets.len()].get();
-            unsafe { &mut *bucket_ptr }
-        })
+    fn get_bucket(&self, id: ThreadID) -> impl DerefMut<Target=ToyHistogram> + '_ {
+        let bucket_ptr = self.buckets[usize::from(id) % self.buckets.len()].get();
+        unsafe { &mut *bucket_ptr }
     }
 }
 
 impl SyncHistogram for ThreadLocalHistogram {
-    fn fill_all(&self, values: &[f32]) {
-        self.get_bucket().fill_all_mut(values)
+    fn fill(&self, values: &[f32]) {
+        self.fill_with_id(values, ThreadID::load())
     }
 
-    // WARNING: This is actually NOT safe to call if other threads are filling concurrently
+    fn fill_with_id(&self, values: &[f32], id: ThreadID) {
+        self.get_bucket(id).fill_mut(values)
+    }
+
+    // BUG: This is actually NOT safe to call if other threads are filling concurrently
     //
     // To achieve this, we'd need to make the binds atomic and manipulate these using
     // atomic loads and stores.
@@ -159,7 +147,7 @@ impl AtomicHistogram {
 }
 
 impl SyncHistogram for AtomicHistogram {
-    fn fill_all(&self, values: &[f32]) {
+    fn fill(&self, values: &[f32]) {
         for value in values {
             let bin = f32::floor(value * (self.bins.len() as f32)) as usize;
             self.bins[bin].fetch_add(1, Ordering::Relaxed);
@@ -202,10 +190,11 @@ mod tests {
     }
 
     fn sequential_microbench(mut histogram: impl Histogram) {
+        let id = ThreadID::load();
+        let mut rng = rand::thread_rng();
         microbench(|| {
-            let mut rng = rand::thread_rng();
             for _ in 0..NUM_ROLLS / BATCH_SIZE {
-                histogram.fill_all_mut(&rng.gen::<[f32; BATCH_SIZE]>());
+                histogram.fill_with_id_mut(&rng.gen::<[f32; BATCH_SIZE]>(), id);
             }
             histogram.num_hits()
         })
@@ -216,8 +205,8 @@ mod tests {
             (0..NUM_ROLLS / BATCH_SIZE)
                 .into_par_iter()
                 .for_each_init(
-                    || rand::thread_rng(),
-                    |rng, _| histogram.fill_all(&rng.gen::<[f32; BATCH_SIZE]>())
+                    || (rand::thread_rng(), ThreadID::load()),
+                    |(rng, id), _| histogram.fill_with_id(&rng.gen::<[f32; BATCH_SIZE]>(), *id)
                 );
             histogram.num_hits()
         })
