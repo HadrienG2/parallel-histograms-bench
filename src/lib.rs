@@ -20,8 +20,17 @@ mod tests {
     // Parameters of the benchmarks are configured here
     const NUM_BINS: usize = 100;
     const NUM_ROLLS: usize = 100_000_000;
-    const BATCH_SIZE: usize = 32;
+    const BATCH_SIZE: usize = 10000;
     const NUM_BUCKETS: usize = 8;
+
+    // Generate a bunch of random numbers
+    fn gen_input<'a>(rng: &mut impl rand::Rng, buf: &'a mut Vec<f32>) -> &'a [f32] {
+        buf.clear();
+        for _ in 0..BATCH_SIZE {
+            buf.push(rng.gen())
+        }
+        &buf[..]
+    }
 
     // Run user-specified microbench, return number of nanosecs per iteration
     fn microbench(runner: impl FnOnce() -> usize) {
@@ -39,9 +48,10 @@ mod tests {
     fn sequential_microbench(mut histogram: impl Histogram) {
         let id = ThreadID::load();
         let mut rng = rand::thread_rng();
+        let mut buf = Vec::with_capacity(BATCH_SIZE);
         microbench(|| {
             for _ in 0..NUM_ROLLS / BATCH_SIZE {
-                histogram.fill_with_id_mut(&rng.gen::<[f32; BATCH_SIZE]>(), id);
+                histogram.fill_with_id_mut(gen_input(&mut rng, &mut buf), id);
             }
             histogram.num_hits()
         })
@@ -52,8 +62,8 @@ mod tests {
             (0..NUM_ROLLS / BATCH_SIZE)
                 .into_par_iter()
                 .for_each_init(
-                    || (rand::thread_rng(), ThreadID::load()),
-                    |(rng, id), _| histogram.fill_with_id(&rng.gen::<[f32; BATCH_SIZE]>(), *id)
+                    || (rand::thread_rng(), ThreadID::load(), Vec::with_capacity(BATCH_SIZE)),
+                    |(rng, id, buf), _| histogram.fill_with_id(gen_input(rng, buf), *id)
                 );
             histogram.num_hits()
         })
