@@ -1,11 +1,10 @@
-mod impls;
-pub(crate) mod thread_id;
-pub(crate) mod traits;
+pub mod impls;
+pub mod thread_id;
+pub mod traits;
 
 
 #[cfg(test)]
 mod tests {
-    use rand::Rng;
     use rayon::prelude::*;
     use std::{
         sync::Mutex,
@@ -18,10 +17,10 @@ mod tests {
     };
 
     // Parameters of the benchmarks are configured here
-    const NUM_BINS: usize = 100;
-    const NUM_ROLLS: usize = 100_000_000;
-    const BATCH_SIZE: usize = 10000;
-    const NUM_BUCKETS: usize = 8;
+    const NUM_BINS: usize = 1000;
+    const NUM_ROLLS: usize = 1_000_000_000;
+    const BATCH_SIZE: usize = 1000;
+    const NUM_BUCKETS: usize = 2;
 
     // Generate a bunch of random numbers
     fn gen_input<'a>(rng: &mut impl rand::Rng, buf: &'a mut Vec<f32>) -> &'a [f32] {
