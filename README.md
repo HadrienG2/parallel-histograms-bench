@@ -43,10 +43,10 @@ in parallel environments.
 
 ## Results
 
-Test hardware: Intel(R) Core(TM) i7-4720HQ CPU @ 2.60GHz (4 cores + HT)
-Compilation settings: As in Cargo.toml + RUSTFLAGS="-C target-cpu=native"
+- Test hardware: Intel(R) Core(TM) i7-4720HQ CPU @ 2.60GHz (4 cores + HT)
+- Compilation settings: As in Cargo.toml + RUSTFLAGS="-C target-cpu=native"
 
-### Most pessimistic scenario (NUM_BINS=1, BATCH_SIZE=1, NUM_BUCKETS=1)
+### Extremely pessimistic scenario (NUM_BINS=1, BATCH_SIZE=1, NUM_BUCKETS=1)
 
     test tests::parallel_atomic ... 27.029199256666665 ns/iter, ok
     test tests::parallel_mutex ... 167.88396467666666 ns/iter, ok
@@ -58,7 +58,7 @@ Compilation settings: As in Cargo.toml + RUSTFLAGS="-C target-cpu=native"
     test tests::sequential_thread_bucketized ... 28.47075245 ns/iter, ok
     test tests::sequential_thread_local ... 12.84956274 ns/iter, ok
 
-### Most optimistic scenario (NUM_BINS=10000, BATCH_SIZE=10000, NUM_BUCKETS=8)
+### Extremely optimistic scenario (NUM_BINS=10000, BATCH_SIZE=10000, NUM_BUCKETS=8)
 
     test tests::parallel_atomic ... 4.721201586666667 ns/iter, ok
     test tests::parallel_mutex ... 6.75420114 ns/iter, ok
@@ -173,12 +173,12 @@ If we look at parallel performance versus number of buckets at BATCH_SIZE=100,
 comparing with the mutex implementation as an optimized case for 1 bucket and
 the thread-local implementation as an optimized case for 8 buckets, we get this:
 
-- Mutex: 14.599817486666666 ns/iter
-- 1 bucket: 14.600787513333334 ns/iter
-- 2 buckets: 7.45863165 ns/iter
-- 4 buckets: 2.275929596666667 ns/iter
-- 8 buckets: 1.7993491666666668 ns/iter
-- thread-local: 1.71461288 ns/iter
+- Mutex: 14.6 ns/iter
+- 1 bucket: 14.6 ns/iter
+- 2 buckets: 7.5 ns/iter
+- 4 buckets: 2.3 ns/iter
+- 8 buckets: 1.8 ns/iter
+- thread-local: 1.7ns/iter
 
 The bucketized solution is obviously able to cover the continuum between a
 single mutex-protected histogram and one local histogram per thread, allowing
