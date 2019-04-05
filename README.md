@@ -10,7 +10,7 @@ complexity and reduced user ergonomics.
 This code aims to get a rough comparison of various implementation strategies
 in a reduced test scenario that is cheap to implement: a 1D histogram, whose
 bins always follow a regularly spaced [0; 1[ axis, whose inputs have equal
-weight, filled from a random distribution.
+weight, filled from a uniform random distribution.
 
 Notice that the simplest benchmarks will be bottlenecked on random number
 generation. This is actually a good thing, as it allows studying scalability
