@@ -183,7 +183,7 @@ the thread-local implementation as an optimized case for 8 buckets, we get this:
 The bucketized solution is obviously able to cover the continuum between a
 single mutex-protected histogram and one local histogram per thread, allowing
 one to fine-tune the memory usage vs scalability compromise and cover a broad
-continuum of use cases without coming at a high code complexity cost.
+range of use cases without coming at a high code complexity cost.
 
 In this sense, we may want to implement such a bucketized strategy on top of
 ROOT, and/or to suggest its integration in ROOT 7.
