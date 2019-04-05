@@ -1,0 +1,13 @@
+[package]
+name = "parallel-histograms"
+version = "0.1.0"
+authors = ["Hadrien Grasland <grasland@lal.in2p3.fr>"]
+edition = "2018"
+
+[dependencies]
+num_cpus = "1.10"
+rand = "0.6"
+rayon = "1.0"
+
+[profile.release]
+debug = true
