@@ -217,6 +217,6 @@ you don't end up profiling a benchmark recompilation:
 Concurrent data structures can be hard to get right. Rust was specifically
 designed to make this kind of job easier. Therefore, it is the perfect tool for
 moving fast on this throwaway micro-project. Since the code is not to be kept
-and reused, typical concerns of easy interfacing and build system complexity do
-not apply. So in the end, the only drawback is unfamiliarity, and I believe
-that the benefits outweigh it.
+and reused, typical concerns of easy interfacing and build system integration
+with C++ do not apply. So in the end, the only drawback is unfamiliarity, and I
+believe that the benefits outweigh that cost.
