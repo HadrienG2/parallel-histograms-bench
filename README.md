@@ -44,71 +44,72 @@ in parallel environments.
 ## Results
 
 Test hardware: Intel(R) Core(TM) i7-4720HQ CPU @ 2.60GHz (4 cores + HT)
+Compilation settings: As in Cargo.toml + RUSTFLAGS="-C target-cpu=native"
 
 ### Most pessimistic scenario (NUM_BINS=1, BATCH_SIZE=1, NUM_BUCKETS=1)
 
-    test tests::parallel_atomic ... 20.79257761 ns/iter, ok
-    test tests::parallel_mutex ... 164.5707874 ns/iter, ok
-    test tests::parallel_thread_bucketized ... 185.20339938 ns/iter, ok
-    test tests::parallel_thread_local ... 5.4353782 ns/iter, ok
-    test tests::sequential_atomic ... 11.95984619 ns/iter, ok
-    test tests::sequential_mutex ... 25.21307109 ns/iter, ok
-    test tests::sequential_raw ... 8.99127911 ns/iter, ok
-    test tests::sequential_thread_bucketized ... 30.09045838 ns/iter, ok
-    test tests::sequential_thread_local ... 16.28675452 ns/iter, ok
+    test tests::parallel_atomic ... 27.029199256666665 ns/iter, ok
+    test tests::parallel_mutex ... 167.88396467666666 ns/iter, ok
+    test tests::parallel_thread_bucketized ... 180.79664561666667 ns/iter, ok
+    test tests::parallel_thread_local ... 4.124025323333333 ns/iter, ok
+    test tests::sequential_atomic ... 14.031784113333334 ns/iter, ok
+    test tests::sequential_mutex ... 26.161589016666667 ns/iter, ok
+    test tests::sequential_raw ... 8.789889383333334 ns/iter, ok
+    test tests::sequential_thread_bucketized ... 28.47075245 ns/iter, ok
+    test tests::sequential_thread_local ... 12.84956274 ns/iter, ok
 
 ### Most optimistic scenario (NUM_BINS=10000, BATCH_SIZE=10000, NUM_BUCKETS=8)
 
-    test tests::parallel_atomic ... 4.68738527 ns/iter, ok
-    test tests::parallel_mutex ... 7.1470852 ns/iter, ok
-    test tests::parallel_thread_bucketized ... 2.11065849 ns/iter, ok
-    test tests::parallel_thread_local ... 1.92915379 ns/iter, ok
-    test tests::sequential_atomic ... 10.29634244 ns/iter, ok
-    test tests::sequential_mutex ... 6.66576012 ns/iter, ok
-    test tests::sequential_raw ... 6.13146942 ns/iter, ok
-    test tests::sequential_thread_bucketized ... 6.61047312 ns/iter, ok
-    test tests::sequential_thread_local ... 6.66112669 ns/iter, ok
+    test tests::parallel_atomic ... 4.721201586666667 ns/iter, ok
+    test tests::parallel_mutex ... 6.75420114 ns/iter, ok
+    test tests::parallel_thread_bucketized ... 1.6864104633333334 ns/iter, ok
+    test tests::parallel_thread_local ... 1.6842381166666667 ns/iter, ok
+    test tests::sequential_atomic ... 10.23260938 ns/iter, ok
+    test tests::sequential_mutex ... 6.63190593 ns/iter, ok
+    test tests::sequential_raw ... 6.14889349 ns/iter, ok
+    test tests::sequential_thread_bucketized ... 6.54847751 ns/iter, ok
+    test tests::sequential_thread_local ... 6.610848116666666 ns/iter, ok
 
 ### More realistic scenario (NUM_BINS=1000, BATCH_SIZE=100, NUM_BUCKETS=2)
 
-    test tests::parallel_atomic ... 6.22302149 ns/iter, ok
-    test tests::parallel_mutex ... 14.26951942 ns/iter, ok
-    test tests::parallel_thread_bucketized ... 7.52768306 ns/iter, ok
-    test tests::parallel_thread_local ... 1.71461288 ns/iter, ok
-    test tests::sequential_atomic ... 10.12079213 ns/iter, ok
-    test tests::sequential_mutex ... 7.0572112 ns/iter, ok
-    test tests::sequential_raw ... 6.28629663 ns/iter, ok
-    test tests::sequential_thread_bucketized ... 6.90092653 ns/iter, ok
-    test tests::sequential_thread_local ... 6.87871612 ns/iter, ok
+    test tests::parallel_atomic ... 7.664906616666666 ns/iter, ok
+    test tests::parallel_mutex ... 14.599817486666666 ns/iter, ok
+    test tests::parallel_thread_bucketized ... 7.489769783333333 ns/iter, ok
+    test tests::parallel_thread_local ... 1.6810039266666668 ns/iter, ok
+    test tests::sequential_atomic ... 10.22832624 ns/iter, ok
+    test tests::sequential_mutex ... 7.0692014966666665 ns/iter, ok
+    test tests::sequential_raw ... 6.351445623333333 ns/iter, ok
+    test tests::sequential_thread_bucketized ... 7.45863165 ns/iter, ok
+    test tests::sequential_thread_local ... 6.96611946 ns/iter, ok
 
 ### ...with more buckets (NUM_BINS=1000, BATCH_SIZE=100, NUM_BUCKETS=4)
 
-    test tests::parallel_thread_bucketized ... 4.70348744 ns/iter, ok
-    test tests::sequential_thread_bucketized ... 6.88107966 ns/iter, ok
+    test tests::parallel_thread_bucketized ... 2.275929596666667 ns/iter, ok
+    test tests::sequential_thread_bucketized ... 7.0084709033333334 ns/iter, ok
 
 ### ...with larger batches (NUM_BINS=1000, BATCH_SIZE=1000, NUM_BUCKETS=2)
 
-    test tests::parallel_atomic ... 6.16730616 ns/iter, ok
-    test tests::parallel_mutex ... 5.72781837 ns/iter, ok
-    test tests::parallel_thread_bucketized ... 3.29252826 ns/iter, ok
-    test tests::parallel_thread_local ... 1.75423857 ns/iter, ok
-    test tests::sequential_atomic ... 10.16097134 ns/iter, ok
-    test tests::sequential_mutex ... 6.62217302 ns/iter, ok
-    test tests::sequential_raw ... 6.11701375 ns/iter, ok
-    test tests::sequential_thread_bucketized ... 6.59167995 ns/iter, ok
-    test tests::sequential_thread_local ... 6.82790948 ns/iter, ok
+    test tests::parallel_atomic ... 6.68549147 ns/iter, ok
+    test tests::parallel_mutex ... 6.002736236666666 ns/iter, ok
+    test tests::parallel_thread_bucketized ... 3.2388442766666667 ns/iter, ok
+    test tests::parallel_thread_local ... 1.6367142533333334 ns/iter, ok
+    test tests::sequential_atomic ... 10.093882856666667 ns/iter, ok
+    test tests::sequential_mutex ... 6.560561 ns/iter, ok
+    test tests::sequential_raw ... 6.093622053333333 ns/iter, ok
+    test tests::sequential_thread_bucketized ... 6.568578303333333 ns/iter, ok
+    test tests::sequential_thread_local ... 6.59893375 ns/iter, ok
 
 ### ...with smaller batches (NUM_BINS=1000, BATCH_SIZE=10, NUM_BUCKETS=2)
 
-    test tests::parallel_atomic ... 5.80851134 ns/iter, ok
-    test tests::parallel_mutex ... 35.61623608 ns/iter, ok
-    test tests::parallel_thread_bucketized ... 17.02857964 ns/iter, ok
-    test tests::parallel_thread_local ... 2.03167379 ns/iter, ok
-    test tests::sequential_atomic ... 10.20022211 ns/iter, ok
-    test tests::sequential_mutex ... 8.3845561 ns/iter, ok
-    test tests::sequential_raw ... 6.90478804 ns/iter, ok
-    test tests::sequential_thread_bucketized ... 9.31056359 ns/iter, ok
-    test tests::sequential_thread_local ... 8.47182069 ns/iter, ok
+    test tests::parallel_atomic ... 5.983635763333333 ns/iter, ok
+    test tests::parallel_mutex ... 34.87436967666667 ns/iter, ok
+    test tests::parallel_thread_bucketized ... 16.687336846666668 ns/iter, ok
+    test tests::parallel_thread_local ... 1.9348726633333333 ns/iter, ok
+    test tests::sequential_atomic ... 10.142460523333334 ns/iter, ok
+    test tests::sequential_mutex ... 8.494325803333334 ns/iter, ok
+    test tests::sequential_raw ... 6.755554803333333 ns/iter, ok
+    test tests::sequential_thread_bucketized ... 9.231934483333333 ns/iter, ok
+    test tests::sequential_thread_local ... 8.063741403333333 ns/iter, ok
 
 ## Tentative conclusions
 
@@ -169,18 +170,29 @@ This was meant to be a midpoint between the mutex-based solution and the
 thread-local solution, and I believe it does serve the intended purpose well.
 
 If we look at parallel performance versus number of buckets at BATCH_SIZE=100,
-using the mutex implementation as an optimized case for 1 bucket and the
-thread-local implementation as an optimized case for 8 buckets, we get this at
-BATCH_SIZE=100...
+comparing with the mutex implementation as an optimized case for 1 bucket and
+the thread-local implementation as an optimized case for 8 buckets, we get this:
 
-- Mutex: 14.26951942 ns/iter
-- 2 buckets: 7.52768306 ns/iter
-- 4 buckets: 4.70348744 ns/iter
+- Mutex: 14.599817486666666 ns/iter
+- 1 bucket: 14.600787513333334 ns/iter
+- 2 buckets: 7.45863165 ns/iter
+- 4 buckets: 2.275929596666667 ns/iter
+- 8 buckets: 1.7993491666666668 ns/iter
 - thread-local: 1.71461288 ns/iter
 
-The thread-local solution is much faster because it does not need to lock a
-mutex, owing to the fact every histogram is thread-local, and also avoids cache
-ping-pong effects entirely.
+The bucketized solution is obviously able to cover the continuum between a
+single mutex-protected histogram and one local histogram per thread, allowing
+one to fine-tune the memory usage vs scalability compromise and cover a broad
+continuum of use cases without coming at a high code complexity cost.
+
+In this sense, we may want to implement such a bucketized strategy on top of
+ROOT, and/or to suggest its integration in ROOT 7.
+
+Note that this benchmark's implementation implements a static mapping of threads
+to buckets, which will only perform optimally in certain conditions (number of
+threads is a multiple of the number of buckets, histogram load is well balanced
+across threads). A dynamic bucket allocation strategy may be used to eliminate
+these problems if needed, at a mild code complexity cost.
 
 ## Running the benchmarks yourself
 
