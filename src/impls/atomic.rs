@@ -15,12 +15,13 @@ impl AtomicHistogram {
         }
     }
 
-    // In sequential mode, can go faster by using simple atomic load/store
+    // In sequential mode, can go faster by using simple atomic load/store.
+    // Performance should be identical to the toy histogram.
     //
-    // NOTE: Unfortunately, the Histogram impl cannot use this method because
-    //       that would require specialization, which Rust doesn't have yet...
+    // NOTE: Unfortunately, our Histogram impl cannot use this method because
+    //       that would require specialization, and Rust doesn't have it yet...
     //
-    pub fn fill_mut_impl(&mut self, values: &[f32]) {
+    pub fn fill_mut_fast(&mut self, values: &[f32]) {
         for value in values {
             let bin = f32::floor(value * (self.bins.len() as f32)) as usize;
             let prev_bin = self.bins[bin].load(Ordering::Relaxed);
