@@ -18,8 +18,8 @@ mod tests {
 
     // Parameters of the benchmarks are configured here
     const NUM_BINS: usize = 1000;
-    const NUM_ROLLS: usize = 1_000_000_000;
-    const BATCH_SIZE: usize = 1000;
+    const NUM_ROLLS: usize = 100_000_000;
+    const BATCH_SIZE: usize = 100;
     const NUM_BUCKETS: usize = 2;
 
     // Generate a bunch of random numbers
