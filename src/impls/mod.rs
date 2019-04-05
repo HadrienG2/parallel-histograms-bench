@@ -1,24 +1,23 @@
 mod atomic;
+mod thread_bucketized;
 mod thread_local;
 
 use {
-    crate::{
-        thread_id::ThreadID,
-        traits::{Histogram, SyncHistogram},
-    },
-    std::{
-        ops::DerefMut,
-        sync::Mutex,
-    },
+    crate::traits::{Histogram, SyncHistogram},
+    std::sync::Mutex,
 };
 
 pub use atomic::AtomicHistogram;
+pub use thread_bucketized::ThreadBucketizedHistogram;
 pub use thread_local::ThreadLocalHistogram;
 
 
 // Toy histogram that's good enough for performance studies
 // One dimensional, every input has same weight, bin absciss in [0, 1[ range.
-// Every other implementation will mimick its behaviour
+//
+// Every other implementation will attempt to provide similar behaviour in a
+// multi-threaded filling environment.
+//
 pub struct ToyHistogram {
     bins: Vec<usize>,
 }
@@ -52,39 +51,5 @@ impl SyncHistogram for Mutex<ToyHistogram> {
 
     fn num_hits(&self) -> usize {
         self.lock().unwrap().num_hits()
-    }
-}
-
-// Slightly more advanced implementation which spreads accesses across a
-// configurable number of buckets to get overhead of TLS down.
-pub struct ThreadBucketizedHistogram {
-    buckets: Vec<Mutex<ToyHistogram>>,
-}
-
-impl ThreadBucketizedHistogram {
-    pub fn new(num_bins: usize, num_buckets: usize) -> Self {
-        Self {
-            buckets: (0..num_buckets).map(|_| Mutex::new(ToyHistogram::new(num_bins))).collect(),
-        }
-    }
-
-    fn lock_bucket(&self, id: ThreadID) -> impl DerefMut<Target=ToyHistogram> + '_ {
-        self.buckets[usize::from(id) % self.buckets.len()].lock().unwrap()
-    }
-}
-
-impl SyncHistogram for ThreadBucketizedHistogram {
-    fn fill(&self, values: &[f32]) {
-        self.fill_with_id(values, ThreadID::load())
-    }
-
-    fn fill_with_id(&self, values: &[f32], id: ThreadID) {
-        self.lock_bucket(id).fill_mut(values)
-    }
-
-    fn num_hits(&self) -> usize {
-        self.buckets.iter()
-            .map(|b| b.lock().unwrap().num_hits())
-            .sum::<usize>()
     }
 }
