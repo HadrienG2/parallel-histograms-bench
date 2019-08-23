@@ -7,7 +7,7 @@ edition = "2018"
 [dependencies]
 num_cpus = "1.10"
 rand = "0.7"
-rayon = "1.0"
+rayon = "1.1"
 
 [profile.release]
 debug = true
