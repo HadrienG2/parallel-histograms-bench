@@ -7,6 +7,7 @@ edition = "2018"
 [dependencies]
 num_cpus = "1.10"
 rand = "0.7"
+rand_xoshiro = "0.4"
 rayon = "1.1"
 
 [profile.release]

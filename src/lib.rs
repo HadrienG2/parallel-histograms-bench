@@ -5,6 +5,8 @@ pub mod traits;
 
 #[cfg(test)]
 mod tests {
+    use rand::SeedableRng;
+    use rand_xoshiro::Xoshiro128Plus;
     use rayon::prelude::*;
     use std::{
         sync::Mutex,
@@ -21,6 +23,8 @@ mod tests {
     const NUM_ROLLS: usize = 300_000_000;
     const BATCH_SIZE: usize = 100;
     const NUM_BUCKETS: usize = 2;
+    const RNG_SEED: [u8; 16] = [0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0,
+                                0x0f, 0xed, 0xcb, 0xa9, 0x87, 0x56, 0x43, 0x21];
 
     // Generate a bunch of random numbers
     #[inline(never)]
@@ -47,7 +51,7 @@ mod tests {
 
     fn sequential_microbench(mut histogram: impl Histogram) {
         let id = ThreadID::load();
-        let mut rng = rand::thread_rng();
+        let mut rng = Xoshiro128Plus::from_seed(RNG_SEED);
         let mut buf = Vec::with_capacity(BATCH_SIZE);
         microbench(|| {
             for _ in 0..NUM_ROLLS / BATCH_SIZE {
@@ -58,11 +62,17 @@ mod tests {
     }
 
     fn parallel_microbench(histogram: impl SyncHistogram) {
+        let rng = Mutex::new(Xoshiro128Plus::from_seed(RNG_SEED));
         microbench(|| {
             (0..NUM_ROLLS / BATCH_SIZE)
                 .into_par_iter()
                 .for_each_init(
-                    || (rand::thread_rng(), ThreadID::load(), Vec::with_capacity(BATCH_SIZE)),
+                    || {
+                        let mut rng_lock = rng.lock().unwrap();
+                        let thread_rng = rng_lock.clone();
+                        rng_lock.jump();
+                        (thread_rng, ThreadID::load(), Vec::with_capacity(BATCH_SIZE))
+                    },
                     |(rng, id, buf), _| histogram.fill_with_id(gen_input(rng, buf), *id)
                 );
             histogram.num_hits()
